@@ -5,11 +5,11 @@
   "main": "./dis/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx webpack && cp index.html ./dist/index.html",
+    "build": "npx webpack",
     "server": "npx webpack-dev-server",
     "dev": "npm run build && npm run server"
   },
-  "author": "",
+  "author": "eguchi@asoal.co.jp",
   "license": "ISC",
   "devDependencies": {
     "html-webpack-plugin": "^5.5.0",
