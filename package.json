@@ -5,6 +5,7 @@
   "main": "./dis/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "eslint": "npx eslint src/**",
     "build": "npx webpack",
     "server": "npx webpack-dev-server",
     "dev": "npm run build && npm run server"
@@ -12,6 +13,9 @@
   "author": "eguchi@asoal.co.jp",
   "license": "ISC",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.24.0",
+    "@typescript-eslint/parser": "^5.24.0",
+    "eslint": "^8.15.0",
     "html-webpack-plugin": "^5.5.0",
     "ts-loader": "^9.3.0",
     "typescript": "^4.6.4",
