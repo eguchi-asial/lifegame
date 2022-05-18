@@ -13,7 +13,7 @@ class Lifegame {
   }
 
   get context(): CanvasRenderingContext2D {
-    return this.context;
+    return this._context;
   }
 }
 
@@ -25,4 +25,5 @@ const initCanvas = (): void => {
 
 window.onload = () => {
   initCanvas();
+  alert('OK');
 };
