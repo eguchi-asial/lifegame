@@ -5,7 +5,7 @@
   "main": "./dis/index.js",
   "scripts": {
     "eslint": "npx eslint --fix src/**",
-    "build:dev": "npx tsc && npx vite build -- --watch --mode development",
+    "build:dev": "npx tsc && npx vite build --mode development",
     "dev": "npm run eslint && npx tsc && npx vite"
   },
   "author": "eguchi@asoal.co.jp",
