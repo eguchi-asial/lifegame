@@ -116,12 +116,9 @@ class Lifegame {
     const drawStartY = Math.floor(this._canvas.height - ((this._squaresCount - yIndex) * rectHeight));
     // console.log(`drawStartX: ${drawStartX}, drawStartY: ${drawStartY}`);
     // 塗りつぶし処理
-    // console.log('this._context.fillStyle: ', this._context.fillStyle);
     this._context.strokeRect(drawStartX, drawStartY, rectWith, rectHeight);
-    const rectFillColor = this._context.fillStyle === '#000000' ? '#ffffff' : '#000000';
-    this._context.fillStyle = rectFillColor;
+    this._context.fillStyle = '#000000';
     this._context.fillRect(drawStartX, drawStartY, rectWith - 1, rectHeight - 1);
-    this.drawFrame();
   };
 
   /**
