@@ -1,5 +1,9 @@
+type StateObjectType = { [key in 'i' | 'x' | 'y' | 'clicked']: number };
+
 class Lifegame {
   private _squaresCount = 20;
+  // xとyは描画スタート位置
+  private _squareStates: StateObjectType[] = [];
   protected _canvas: HTMLCanvasElement;
   protected _context: CanvasRenderingContext2D | null;
   constructor(canvas: HTMLCanvasElement) {
@@ -57,7 +61,8 @@ class Lifegame {
    */
   clearSquares = () => {
     if (!this._context) throw new Error('context is not found');
-
+    // マス目状態管理配列クリア
+    this._squareStates = [];
     this._context.moveTo(0, 0);
     this._context.fillStyle = '#ffffff';
     const squareWidth = this._canvas.width / this._squaresCount;
@@ -69,6 +74,14 @@ class Lifegame {
         const w = squareWidth - this._context.lineWidth;
         const h = squareHeight - this._context.lineWidth;
         this._context.fillRect(x, y, w, h);
+        const drawStartX = Math.floor(this._canvas.width - ((this._squaresCount - i) * squareWidth));
+        const drawStartY = Math.floor(this._canvas.height - ((this._squaresCount - ii) * squareHeight));
+        this._squareStates.push({
+          i: i + ii,
+          x: drawStartX,
+          y: drawStartY,
+          clicked: 0
+        })
       }
     }
   };
@@ -119,6 +132,11 @@ class Lifegame {
     this._context.strokeRect(drawStartX, drawStartY, rectWith, rectHeight);
     this._context.fillStyle = '#000000';
     this._context.fillRect(drawStartX, drawStartY, rectWith - 1, rectHeight - 1);
+
+    // 状態管理更新
+    const squareState = this._squareStates.find((state: StateObjectType) => state.x === drawStartX && state.y === drawStartY)
+    if (!squareState) throw new Error('target square is not found.');
+    squareState.clicked = 1;
   };
 
   /**
@@ -128,6 +146,7 @@ class Lifegame {
   onClickStartButton = () => {
     if (!this._context) throw new Error('context is not found');
     // TODO setIntervalで面判定処理入れる
+    // stateにclickedが1なら黒生存
   };
 
   /**
