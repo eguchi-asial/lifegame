@@ -81,7 +81,7 @@ class Lifegame {
           x: drawStartX,
           y: drawStartY,
           clicked: 0
-        })
+        });
       }
     }
   };
@@ -127,14 +127,14 @@ class Lifegame {
     // console.log(`xIndex: ${xIndex}, yIndex: ${yIndex}`);
     const drawStartX = Math.floor(this._canvas.width - ((this._squaresCount - xIndex) * rectWith));
     const drawStartY = Math.floor(this._canvas.height - ((this._squaresCount - yIndex) * rectHeight));
-    // console.log(`drawStartX: ${drawStartX}, drawStartY: ${drawStartY}`);
+    console.log(`drawStartX: ${drawStartX}, drawStartY: ${drawStartY}`);
     // 塗りつぶし処理
     this._context.strokeRect(drawStartX, drawStartY, rectWith, rectHeight);
     this._context.fillStyle = '#000000';
     this._context.fillRect(drawStartX, drawStartY, rectWith - 1, rectHeight - 1);
 
     // 状態管理更新
-    const squareState = this._squareStates.find((state: StateObjectType) => state.x === drawStartX && state.y === drawStartY)
+    const squareState = this._squareStates.find((state: StateObjectType) => state.x === drawStartX && state.y === drawStartY);
     if (!squareState) throw new Error('target square is not found.');
     squareState.clicked = 1;
   };
@@ -145,8 +145,48 @@ class Lifegame {
    */
   onClickStartButton = () => {
     if (!this._context) throw new Error('context is not found');
+    const squareWidth = this._canvas.width / this._squaresCount;
     // TODO setIntervalで面判定処理入れる
     // stateにclickedが1なら黒生存
+    this._squareStates.map(state => {
+      console.log(state);
+      // 自点 x,yに対して以下の8パターンを走査する。ただしxyはcanvasのh,wに収まる範囲内のみ
+      // x-25, y-25
+      // x, y-25
+      // x+25, y-25
+      // x+25, y
+      // x+25, y+25
+      // x, y+25
+      // x-25, y+25
+      // x-25, y
+      const pattern1: [x: number, y: number] = [state.x - 25, state.y - 25];
+      const pattern2: [x: number, y: number] = [state.x, state.y - 25];
+      const pattern3: [x: number, y: number] = [state.x + 25, state.y - 25];
+      const pattern4: [x: number, y: number] = [state.x + 25, state.y];
+      const pattern5: [x: number, y: number] = [state.x + 25, state.y + 25];
+      const pattern6: [x: number, y: number] = [state.x, state.y + 25];
+      const pattern7: [x: number, y: number] = [state.x - 25, state.y + 25];
+      const pattern8: [x: number, y: number] = [state.x - 25, state.y];
+      for (let i = 1; i < 9; i++) {
+        const isValid = this.checkValidXY(eval(`pattern${i}`));
+        console.log(eval(`pattern${i}`).x, eval(`pattern${i}`).y, isValid);
+        if (isValid) {
+          // TODO 生き死に判定 lifegameルールのあれ
+        }
+      }
+    });
+  };
+
+  /**
+   * x,yがcanvasのh/wに収まっている座標かチェックする
+   * @param pattern 
+   * @returns 
+   */
+  checkValidXY(pattern: [x: number, y: number]): boolean {
+    const [x, y] = pattern;
+    const rectWith = this._canvas.width / this._squaresCount;
+    const rectHeight = this._canvas.height / this._squaresCount;
+    return 0 <= x && x <= this._canvas.width - rectWith && 0 <= y && y <= this._canvas.height - rectHeight
   };
 
   /**
