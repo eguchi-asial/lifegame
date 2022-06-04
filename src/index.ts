@@ -3,6 +3,7 @@ type StateObjectType = { [key in 'x' | 'y' | 'clicked']: number };
 class Lifegame {
   private _intervalId = 0;
   private _squaresCount = 20;
+  private _isRunning = false;
   // xとyは描画スタート位置
   private _squareStates: StateObjectType[] = [];
   protected _canvas: HTMLCanvasElement;
@@ -136,7 +137,6 @@ class Lifegame {
     squareState.clicked = 1;
     const stateIndex = this._squareStates.findIndex((state: StateObjectType) => state.x === drawStartX && state.y === drawStartY);
     this._squareStates[stateIndex] = squareState;
-    console.log(this._squareStates);
   };
 
   /**
@@ -147,7 +147,9 @@ class Lifegame {
     if (!this._context) throw new Error('context is not found');
     // stateにclickedが1なら黒生存
     this._intervalId = setInterval(() => {
-      this._squareStates.map(state => {
+      if (this._isRunning) return;
+      this._isRunning = true
+      Array.from(this._squareStates).map(state => {
         // 自点 x,yに対して以下の8パターンを走査する。ただしxyはcanvasのh,wに収まる範囲内のみ
         // x-25, y-25
         // x, y-25
@@ -169,8 +171,10 @@ class Lifegame {
         let aliveCount = 0;
         // 周囲の有効な四角でかつクリックされた四角の数をカウント
         for (let i = 1; i <= patterns.length; i++) {
+          // 場外な座標は対象外
           const isValid = this.checkValidXY(eval(`pattern${i}`) as [x: number, y: number]);
           if (isValid) {
+            // 対象なら、クリックされた生きている四角かどうかを算出
             aliveCount += (eval(`pattern${i}`) as [x: number, y: number, isAlive: boolean])[2] ? 1 : 0;
           }
         }
@@ -191,9 +195,10 @@ class Lifegame {
           this._context.fillStyle = state.clicked === 1 ? '#000000' : '#ffffff';
           this._context.fillRect(state.x, state.y, rectWith - 1, rectHeight - 1);
         }
-        // フレーム枠描画
-        this.drawFrame();
       });
+      // フレーム枠描画
+      this.drawFrame();
+      this._isRunning = false;
     }, 1000);
   };
 
