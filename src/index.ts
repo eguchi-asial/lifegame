@@ -1,6 +1,7 @@
-type StateObjectType = { [key in 'i' | 'x' | 'y' | 'clicked']: number };
+type StateObjectType = { [key in 'x' | 'y' | 'clicked']: number };
 
 class Lifegame {
+  private _intervalId = 0;
   private _squaresCount = 20;
   // xとyは描画スタート位置
   private _squareStates: StateObjectType[] = [];
@@ -77,7 +78,6 @@ class Lifegame {
         const drawStartX = Math.floor(this._canvas.width - ((this._squaresCount - i) * squareWidth));
         const drawStartY = Math.floor(this._canvas.height - ((this._squaresCount - ii) * squareHeight));
         this._squareStates.push({
-          i: i + ii,
           x: drawStartX,
           y: drawStartY,
           clicked: 0
@@ -118,16 +118,13 @@ class Lifegame {
     const rect = clickedElement.getBoundingClientRect();
     const x = pe.clientX - rect.left;
     const y = pe.clientY - rect.top;
-    // console.log(`x: + ${x} y: + ${y}`);
     const rectWith = this._canvas.width / this._squaresCount;
     const rectHeight = this._canvas.height / this._squaresCount;
     // x座標が何番目のマスに当たるのか算出
     const xIndex = Math.floor(x / rectWith);
     const yIndex = Math.floor(y / rectHeight);
-    // console.log(`xIndex: ${xIndex}, yIndex: ${yIndex}`);
     const drawStartX = Math.floor(this._canvas.width - ((this._squaresCount - xIndex) * rectWith));
     const drawStartY = Math.floor(this._canvas.height - ((this._squaresCount - yIndex) * rectHeight));
-    console.log(`drawStartX: ${drawStartX}, drawStartY: ${drawStartY}`);
     // 塗りつぶし処理
     this._context.strokeRect(drawStartX, drawStartY, rectWith, rectHeight);
     this._context.fillStyle = '#000000';
@@ -137,6 +134,9 @@ class Lifegame {
     const squareState = this._squareStates.find((state: StateObjectType) => state.x === drawStartX && state.y === drawStartY);
     if (!squareState) throw new Error('target square is not found.');
     squareState.clicked = 1;
+    const stateIndex = this._squareStates.findIndex((state: StateObjectType) => state.x === drawStartX && state.y === drawStartY);
+    this._squareStates[stateIndex] = squareState;
+    console.log(this._squareStates);
   };
 
   /**
@@ -145,36 +145,56 @@ class Lifegame {
    */
   onClickStartButton = () => {
     if (!this._context) throw new Error('context is not found');
-    const squareWidth = this._canvas.width / this._squaresCount;
-    // TODO setIntervalで面判定処理入れる
     // stateにclickedが1なら黒生存
-    this._squareStates.map(state => {
-      console.log(state);
-      // 自点 x,yに対して以下の8パターンを走査する。ただしxyはcanvasのh,wに収まる範囲内のみ
-      // x-25, y-25
-      // x, y-25
-      // x+25, y-25
-      // x+25, y
-      // x+25, y+25
-      // x, y+25
-      // x-25, y+25
-      // x-25, y
-      const pattern1: [x: number, y: number] = [state.x - 25, state.y - 25];
-      const pattern2: [x: number, y: number] = [state.x, state.y - 25];
-      const pattern3: [x: number, y: number] = [state.x + 25, state.y - 25];
-      const pattern4: [x: number, y: number] = [state.x + 25, state.y];
-      const pattern5: [x: number, y: number] = [state.x + 25, state.y + 25];
-      const pattern6: [x: number, y: number] = [state.x, state.y + 25];
-      const pattern7: [x: number, y: number] = [state.x - 25, state.y + 25];
-      const pattern8: [x: number, y: number] = [state.x - 25, state.y];
-      for (let i = 1; i < 9; i++) {
-        const isValid = this.checkValidXY(eval(`pattern${i}`));
-        console.log(eval(`pattern${i}`).x, eval(`pattern${i}`).y, isValid);
-        if (isValid) {
-          // TODO 生き死に判定 lifegameルールのあれ
+    this._intervalId = setInterval(() => {
+      this._squareStates.map(state => {
+        // 自点 x,yに対して以下の8パターンを走査する。ただしxyはcanvasのh,wに収まる範囲内のみ
+        // x-25, y-25
+        // x, y-25
+        // x+25, y-25
+        // x+25, y
+        // x+25, y+25
+        // x, y+25
+        // x-25, y+25
+        // x-25, y
+        const pattern1: [x: number, y: number, isAlive: boolean] = [state.x - 25, state.y - 25, this._squareStates.find(s => s.x === state.x - 25 && s.y === state.y - 25)?.clicked === 1];
+        const pattern2: [x: number, y: number, isAlive: boolean] = [state.x, state.y - 25, this._squareStates.find(s => s.x === state.x && s.y === state.y - 25)?.clicked === 1];
+        const pattern3: [x: number, y: number, isAlive: boolean] = [state.x + 25, state.y - 25, this._squareStates.find(s => s.x === state.x + 25 && s.y === state.y - 25)?.clicked === 1];
+        const pattern4: [x: number, y: number, isAlive: boolean] = [state.x + 25, state.y, this._squareStates.find(s => s.x === state.x + 25 && s.y === state.y)?.clicked === 1];
+        const pattern5: [x: number, y: number, isAlive: boolean] = [state.x + 25, state.y + 25, this._squareStates.find(s => s.x === state.x + 25 && s.y === state.y + 25)?.clicked === 1];
+        const pattern6: [x: number, y: number, isAlive: boolean] = [state.x, state.y + 25, this._squareStates.find(s => s.x === state.x && s.y === state.y + 25)?.clicked === 1];
+        const pattern7: [x: number, y: number, isAlive: boolean] = [state.x - 25, state.y + 25, this._squareStates.find(s => s.x === state.x - 25 && s.y === state.y + 25)?.clicked === 1];
+        const pattern8: [x: number, y: number, isAlive: boolean] = [state.x - 25, state.y, this._squareStates.find(s => s.x === state.x - 25 && s.y === state.y)?.clicked === 1];
+        const patterns = [pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8];
+        let aliveCount = 0;
+        // 周囲の有効な四角でかつクリックされた四角の数をカウント
+        for (let i = 1; i <= patterns.length; i++) {
+          const isValid = this.checkValidXY(eval(`pattern${i}`) as [x: number, y: number]);
+          if (isValid) {
+            aliveCount += (eval(`pattern${i}`) as [x: number, y: number, isAlive: boolean])[2] ? 1 : 0;
+          }
         }
-      }
-    });
+        // 生命がいる場合(clicked=true)は、周囲に2個、または3個の生命がいる場合(clicked=true)に、そのまま生命が残ります(clcked=true)。
+        // 生命のいない場合(clicked=false)は、周囲に3個の生命がある場合(clicked=true)に、新しく生命が誕生(clicked=trueに変更)。
+        // 上記に該当しない場合は死(clicked=false)
+        if (state.clicked) {
+          state.clicked = aliveCount === 2 || aliveCount === 3 ? 1 : 0;
+        } else {
+          state.clicked = aliveCount === 3 ? 1 : 0;
+        }
+        // 更新されたstateに則って再描画する
+        // 塗りつぶし処理
+        const rectWith = this._canvas.width / this._squaresCount;
+        const rectHeight = this._canvas.height / this._squaresCount;
+        if (this._context) {
+          this._context.strokeRect(state.x, state.y, rectWith, rectHeight);
+          this._context.fillStyle = state.clicked === 1 ? '#000000' : '#ffffff';
+          this._context.fillRect(state.x, state.y, rectWith - 1, rectHeight - 1);
+        }
+        // フレーム枠描画
+        this.drawFrame();
+      });
+    }, 1000);
   };
 
   /**
@@ -186,13 +206,14 @@ class Lifegame {
     const [x, y] = pattern;
     const rectWith = this._canvas.width / this._squaresCount;
     const rectHeight = this._canvas.height / this._squaresCount;
-    return 0 <= x && x <= this._canvas.width - rectWith && 0 <= y && y <= this._canvas.height - rectHeight
-  };
+    return 0 <= x && x <= this._canvas.width - rectWith && 0 <= y && y <= this._canvas.height - rectHeight;
+  }
 
   /**
    * クリアボタン押下処理
    */
   onClickClearButton = () => {
+    clearInterval(this._intervalId);
     this.initCanvas();
   };
 
