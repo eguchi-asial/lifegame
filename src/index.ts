@@ -144,11 +144,12 @@ class Lifegame {
    * @returns 
    */
   onClickStartButton = () => {
+    if (this._intervalId > 0) return;
     if (!this._context) throw new Error('context is not found');
     // stateにclickedが1なら黒生存
     this._intervalId = setInterval(() => {
       if (this._isRunning) return;
-      this._isRunning = true
+      this._isRunning = true;
       Array.from(this._squareStates).map(state => {
         // 自点 x,yに対して以下の8パターンを走査する。ただしxyはcanvasのh,wに収まる範囲内のみ
         // x-25, y-25
@@ -219,6 +220,7 @@ class Lifegame {
    */
   onClickClearButton = () => {
     clearInterval(this._intervalId);
+    this._intervalId = 0;
     this.initCanvas();
   };
 
